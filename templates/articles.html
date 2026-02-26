@@ -1,0 +1,836 @@
+{% extends "base.html" %}
+{% block title %}Articles — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">Articles</h1>
+            </div>
+            <div class="top-bar-right">
+                <span class="tag" id="article-count" style="font-size: 11px;">0</span>
+                <button class="btn btn-primary btn-sm" id="refresh-btn" onclick="refreshFeeds()">
+                    <i class="fas fa-sync"></i> <span>Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Premium Filter Bar -->
+            <div class="art-toolbar">
+                <div class="art-search-wrap">
+                    <i class="fas fa-search art-search-icon"></i>
+                    <input type="text" class="art-search-input" id="article-search" placeholder="Search AI articles...">
+                </div>
+                <div class="art-filters">
+                    <select class="art-select" id="article-category">
+                        <option value="">🌐 All</option>
+                    </select>
+                    <select class="art-select" id="article-sort">
+                        <option value="newest">📅 Newest</option>
+                        <option value="oldest">📅 Oldest</option>
+                        <option value="source">📰 Source</option>
+                    </select>
+                    <div class="art-view-toggle">
+                        <button class="art-view-btn view-active" id="view-grid-btn" onclick="setView('grid')">
+                            <i class="fas fa-th-large"></i>
+                        </button>
+                        <button class="art-view-btn" id="view-list-btn" onclick="setView('list')">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Articles Container -->
+            <div id="articles-container" class="art-grid"></div>
+
+            <!-- Pagination -->
+            <div class="art-pagination" id="articles-pagination"></div>
+        </div>
+    </main>
+</div>
+
+<!-- POST EDITOR MODAL (same as trends.html) -->
+<div class="modal-overlay" id="post-editor-modal">
+    <div class="modal" style="max-width: 680px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-pen-fancy" style="color: var(--accent-primary);"></i> Create & Publish Post</h3>
+            <button class="modal-close" onclick="App.closeModal('post-editor-modal')"><i
+                    class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Post Language</label>
+                <select class="form-select" id="editor-language">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇸🇦 Arabic (العربية)</option>
+                    <option value="fr">🇫🇷 French</option>
+                    <option value="es">🇪🇸 Spanish</option>
+                    <option value="de">🇩🇪 German</option>
+                    <option value="zh">🇨🇳 Chinese</option>
+                    <option value="ja">🇯🇵 Japanese</option>
+                    <option value="ko">🇰🇷 Korean</option>
+                    <option value="pt">🇧🇷 Portuguese</option>
+                    <option value="ru">🇷🇺 Russian</option>
+                    <option value="tr">🇹🇷 Turkish</option>
+                    <option value="hi">🇮🇳 Hindi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Title *</label>
+                <input type="text" class="form-input" id="editor-title" placeholder="Catchy headline...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Body *</label>
+                <textarea class="form-textarea" id="editor-body" rows="5" placeholder="Your post content..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Call to Action</label>
+                <input type="text" class="form-input" id="editor-cta" placeholder="💡 Follow for more AI updates!">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hashtags</label>
+                <input type="text" class="form-input" id="editor-hashtags" placeholder="#AI #MachineLearning #Tech">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Source Link</label>
+                <input type="text" class="form-input" id="editor-link" placeholder="https://...">
+            </div>
+            <!-- Platforms -->
+            <div class="form-group">
+                <label class="form-label">Publish To</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label class="platform-check" title="Telegram">
+                        <input type="checkbox" id="editor-plat-telegram" checked>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#0088cc">
+                            <path
+                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="X (Twitter)">
+                        <input type="checkbox" id="editor-plat-twitter">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="LinkedIn">
+                        <input type="checkbox" id="editor-plat-linkedin">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="#0A66C2">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+            <!-- Image -->
+            <div class="form-group"
+                style="padding: 14px; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border-glass);">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="editor-gen-image" checked
+                            style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                        <span>🎨 Generate AI Image</span>
+                    </label>
+                    <select class="form-select" id="editor-image-model"
+                        style="width: auto; min-width: 140px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🤖 Auto</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                    <select class="form-select" id="editor-image-style"
+                        style="width: auto; min-width: 120px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🎨 Auto Style</option>
+                        <option value="digital-art">🖼️ Digital Art</option>
+                        <option value="realistic">📷 Realistic</option>
+                        <option value="abstract">🌀 Abstract</option>
+                        <option value="neon-tech">💡 Neon Tech</option>
+                        <option value="minimalist">✨ Minimalist</option>
+                    </select>
+                    <select class="form-select" id="editor-image-size"
+                        style="width: auto; min-width: 120px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">📐 Auto Size</option>
+                        <option value="landscape">🖥️ Landscape</option>
+                        <option value="square">⬜ Square</option>
+                        <option value="portrait">📱 Portrait</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary w-full btn-lg" id="editor-publish-btn" onclick="App.publishFromEditor()"
+                style="font-size: 15px; padding: 14px;">
+                <i class="fas fa-paper-plane"></i> Publish Post
+            </button>
+            <div id="editor-result" style="margin-top: 12px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    /* ═══ ARTICLES PAGE — PREMIUM DESIGN ═══ */
+    .art-toolbar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding: 14px 18px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
+    }
+
+    .art-search-wrap {
+        flex: 1;
+        min-width: 200px;
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .art-search-icon {
+        position: absolute;
+        left: 12px;
+        color: var(--text-muted);
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .art-search-input {
+        width: 100%;
+        padding: 10px 14px 10px 36px;
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 14px;
+        outline: none;
+        transition: border-color var(--transition-fast);
+    }
+
+    .art-search-input:focus {
+        border-color: var(--accent-primary);
+    }
+
+    .art-filters {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .art-select {
+        padding: 8px 12px;
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 13px;
+        cursor: pointer;
+        outline: none;
+        min-width: 100px;
+    }
+
+    .art-view-toggle {
+        display: flex;
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+    }
+
+    .art-view-btn {
+        padding: 8px 12px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        font-size: 13px;
+    }
+
+    .art-view-btn.view-active {
+        background: var(--accent-primary);
+        color: #fff;
+    }
+
+    .art-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 20px;
+    }
+
+    .art-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    /* Card */
+    .art-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .art-card:hover {
+        border-color: var(--accent-primary);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15), 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .art-card-gradient {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+    }
+
+    .art-card-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+    }
+
+    .art-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.45;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .art-card-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color var(--transition-fast);
+    }
+
+    .art-card-title a:hover {
+        color: var(--accent-primary);
+    }
+
+    .art-card-meta {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .art-meta-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    .art-meta-tag.cat {
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--accent-primary);
+    }
+
+    .art-meta-tag.src {
+        background: rgba(6, 182, 212, 0.12);
+        color: var(--accent-tertiary);
+    }
+
+    .art-meta-tag.time {
+        background: rgba(245, 158, 11, 0.12);
+        color: var(--accent-warning);
+    }
+
+    .art-card-summary {
+        font-size: 13px;
+        color: var(--text-secondary);
+        line-height: 1.65;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .art-card-footer {
+        display: flex;
+        gap: 8px;
+        padding: 12px 20px;
+        border-top: 1px solid var(--border-glass);
+        background: rgba(0, 0, 0, 0.15);
+    }
+
+    .art-card-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-decoration: none;
+        border: none;
+    }
+
+    .art-card-btn.read {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--accent-primary);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .art-card-btn.read:hover {
+        background: rgba(99, 102, 241, 0.25);
+    }
+
+    .art-card-btn.post {
+        background: var(--gradient-primary);
+        color: #fff;
+        border: none;
+    }
+
+    .art-card-btn.post:hover {
+        filter: brightness(1.15);
+        transform: scale(1.02);
+    }
+
+    /* List */
+    .art-list .art-card {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .art-list .art-card-gradient {
+        width: 4px;
+        height: auto;
+        min-height: 100%;
+        background: linear-gradient(180deg, var(--accent-primary), var(--accent-secondary));
+    }
+
+    .art-list .art-card-body {
+        flex: 1;
+        padding: 14px 16px;
+        gap: 6px;
+    }
+
+    .art-list .art-card-title {
+        font-size: 14px;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+    }
+
+    .art-list .art-card-summary {
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
+        font-size: 12px;
+    }
+
+    .art-list .art-card-footer {
+        flex-direction: column;
+        border-top: none;
+        border-left: 1px solid var(--border-glass);
+        padding: 10px 14px;
+        justify-content: center;
+        min-width: 150px;
+    }
+
+    /* Skeleton loading */
+    .art-skeleton {
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+    }
+
+    .art-skeleton .skel-bar {
+        background: linear-gradient(90deg, var(--bg-glass) 25%, rgba(99, 102, 241, 0.08) 50%, var(--bg-glass) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 6px;
+    }
+
+    .art-skeleton .skel-gradient {
+        height: 4px;
+        width: 100%;
+        background: linear-gradient(90deg, var(--bg-glass), rgba(99, 102, 241, 0.1));
+    }
+
+    .art-skeleton .skel-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .art-skeleton .skel-title {
+        height: 18px;
+        width: 85%;
+    }
+
+    .art-skeleton .skel-meta {
+        height: 12px;
+        width: 60%;
+    }
+
+    .art-skeleton .skel-text {
+        height: 14px;
+        width: 100%;
+    }
+
+    .art-skeleton .skel-text2 {
+        height: 14px;
+        width: 70%;
+    }
+
+    .art-skeleton .skel-footer {
+        padding: 12px 20px;
+        border-top: 1px solid var(--border-glass);
+        display: flex;
+        gap: 8px;
+    }
+
+    .art-skeleton .skel-btn {
+        height: 34px;
+        flex: 1;
+    }
+
+    /* Pagination */
+    .art-pagination {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+        margin-top: 28px;
+        padding: 16px 0;
+    }
+
+    .art-page-btn {
+        min-width: 38px;
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-glass);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+    }
+
+    .art-page-btn:hover:not(:disabled) {
+        border-color: var(--accent-primary);
+        color: var(--accent-primary);
+    }
+
+    .art-page-btn.active {
+        background: var(--accent-primary);
+        color: #fff;
+        border-color: var(--accent-primary);
+    }
+
+    .art-page-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+    }
+
+    /* Refresh animation */
+    .refresh-spin {
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .art-toolbar {
+            flex-direction: column;
+            padding: 12px;
+            gap: 10px;
+        }
+
+        .art-search-wrap {
+            min-width: 100%;
+        }
+
+        .art-filters {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .art-select {
+            flex: 1;
+            min-width: 0;
+            font-size: 12px;
+            padding: 8px;
+        }
+
+        .art-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .art-card-body {
+            padding: 16px;
+        }
+
+        .art-card-title {
+            font-size: 14px;
+        }
+
+        .art-card-summary {
+            font-size: 12px;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+        }
+
+        .art-card-footer {
+            padding: 10px 16px;
+        }
+
+        .art-card-btn {
+            font-size: 11px;
+            padding: 7px 10px;
+        }
+
+        .art-list .art-card {
+            flex-direction: column;
+        }
+
+        .art-list .art-card-gradient {
+            width: 100%;
+            height: 4px;
+            min-height: 4px;
+        }
+
+        .art-list .art-card-footer {
+            flex-direction: row;
+            border-left: none;
+            border-top: 1px solid var(--border-glass);
+            min-width: 0;
+        }
+
+        .art-pagination {
+            gap: 4px;
+        }
+
+        .art-page-btn {
+            min-width: 34px;
+            height: 34px;
+            font-size: 12px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .art-card-footer {
+            flex-direction: column;
+        }
+
+        .art-filters {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<script>
+    let allArticles = [];
+    let currentPage = 1;
+    let currentView = 'grid';
+    const PAGE_SIZE = 24;
+
+    function setView(v) {
+        currentView = v;
+        document.getElementById('view-grid-btn').classList.toggle('view-active', v === 'grid');
+        document.getElementById('view-list-btn').classList.toggle('view-active', v === 'list');
+        renderArticles();
+    }
+
+    function showSkeletons() {
+        const c = document.getElementById('articles-container');
+        c.className = 'art-grid';
+        c.innerHTML = Array(8).fill(`
+            <div class="art-skeleton">
+                <div class="skel-gradient skel-bar"></div>
+                <div class="skel-body">
+                    <div class="skel-bar skel-title"></div>
+                    <div class="skel-bar skel-meta"></div>
+                    <div class="skel-bar skel-text"></div>
+                    <div class="skel-bar skel-text2"></div>
+                </div>
+                <div class="skel-footer">
+                    <div class="skel-bar skel-btn"></div>
+                    <div class="skel-bar skel-btn"></div>
+                </div>
+            </div>`).join('');
+    }
+
+    function renderArticles() {
+        const container = document.getElementById('articles-container');
+        const search = document.getElementById('article-search').value.toLowerCase();
+        const category = document.getElementById('article-category').value;
+        const sort = document.getElementById('article-sort').value;
+
+        let filtered = allArticles.filter(a => {
+            const matchSearch = !search || (a.title || '').toLowerCase().includes(search) || (a.source || '').toLowerCase().includes(search) || (a.summary || '').toLowerCase().includes(search);
+            const matchCat = !category || a.category === category;
+            return matchSearch && matchCat;
+        });
+
+        if (sort === 'newest') filtered.sort((a, b) => new Date(b.published || b.fetched_at || 0) - new Date(a.published || a.fetched_at || 0));
+        else if (sort === 'oldest') filtered.sort((a, b) => new Date(a.published || a.fetched_at || 0) - new Date(b.published || b.fetched_at || 0));
+        else if (sort === 'source') filtered.sort((a, b) => (a.source || '').localeCompare(b.source || ''));
+
+        document.getElementById('article-count').textContent = `${filtered.length} articles`;
+
+        const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const page = filtered.slice(start, start + PAGE_SIZE);
+        container.className = currentView === 'grid' ? 'art-grid' : 'art-list';
+
+        if (!page.length) {
+            container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:60px;text-align:center;">
+                <i class="fas fa-newspaper" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>
+                <h3 style="color:var(--text-primary);margin-bottom:8px;">No articles found</h3>
+                <p style="color:var(--text-muted);">Try adjusting your filters or refresh feeds.</p></div>`;
+            document.getElementById('articles-pagination').innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = page.map(a => {
+            const ago = (a.published || a.fetched_at) ? App.timeAgo(a.published || a.fetched_at) : '';
+            const cat = a.category || 'AI';
+            const link = a.link || '#';
+            const sid = (a.id || '').replace(/'/g, "\\'");
+            return `<div class="art-card">
+                <div class="art-card-gradient"></div>
+                <div class="art-card-body">
+                    <div class="art-card-title"><a href="${esc(link)}" target="_blank" rel="noopener">${esc(a.title || 'Untitled')}</a></div>
+                    <div class="art-card-meta">
+                        <span class="art-meta-tag cat">${esc(cat)}</span>
+                        <span class="art-meta-tag src"><i class="fas fa-rss"></i> ${esc(a.source || '')}</span>
+                        ${ago ? `<span class="art-meta-tag time"><i class="far fa-clock"></i> ${ago}</span>` : ''}
+                    </div>
+                    <div class="art-card-summary">${esc((a.summary || '').substring(0, 250))}</div>
+                </div>
+                <div class="art-card-footer">
+                    <a href="${esc(link)}" target="_blank" rel="noopener" class="art-card-btn read"><i class="fas fa-external-link-alt"></i> Read</a>
+                    <button class="art-card-btn post" onclick="event.stopPropagation();createPostFrom('${sid}')"><i class="fas fa-pen-nib"></i> Create Post</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        let pg = '';
+        if (totalPages > 1) {
+            pg += `<button class="art-page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goPage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) pg += `<button class="art-page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+                else if (Math.abs(i - currentPage) === 3) pg += `<span style="color:var(--text-muted);padding:0 4px;">…</span>`;
+            }
+            pg += `<button class="art-page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goPage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+        }
+        document.getElementById('articles-pagination').innerHTML = pg;
+    }
+
+    function goPage(p) { currentPage = p; renderArticles(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    function createPostFrom(id) {
+        const a = allArticles.find(x => x.id === id);
+        if (!a) return;
+        App.openPostEditor({
+            title: a.title || '',
+            body: a.summary || '',
+            cta: '💡 Follow for more AI & Tech updates!',
+            hashtags: '#AI #ArtificialIntelligence #Tech',
+            link: a.link || '',
+        });
+    }
+
+    async function refreshFeeds() {
+        const btn = document.getElementById('refresh-btn');
+        const icon = btn.querySelector('i');
+        icon.classList.add('refresh-spin');
+        btn.disabled = true;
+        showSkeletons();
+        App.showToast('🔄 Fetching AI articles from 100+ sources...', 'info', 60000);
+        try {
+            const result = await API.refreshArticles();
+            App.showToast(`✅ Fetched ${result.total_new} new AI articles`, 'success', 5000);
+            await loadArticles();
+        } catch (err) {
+            App.showToast(err.message || 'Refresh failed', 'error');
+        } finally {
+            icon.classList.remove('refresh-spin');
+            btn.disabled = false;
+        }
+    }
+
+    async function loadArticles() {
+        showSkeletons();
+        try {
+            const data = await API.get('/trends/articles?limit=2000');
+            allArticles = data.articles || [];
+            const cats = [...new Set(allArticles.map(a => a.category).filter(Boolean))].sort();
+            const catSel = document.getElementById('article-category');
+            catSel.innerHTML = '<option value="">🌐 All</option>';
+            cats.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o); });
+            renderArticles();
+        } catch (err) {
+            document.getElementById('articles-container').innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:60px;text-align:center;">
+                <i class="fas fa-exclamation-triangle" style="font-size:48px;color:var(--accent-danger);margin-bottom:16px;"></i>
+                <h3 style="color:var(--text-primary);">Failed to load</h3><p style="color:var(--text-muted);">${err.message}</p></div>`;
+        }
+    }
+
+    function esc(t) { const d = document.createElement('div'); d.textContent = t || ''; return d.innerHTML; }
+
+    document.getElementById('article-search').addEventListener('input', () => { currentPage = 1; renderArticles(); });
+    document.getElementById('article-category').addEventListener('change', () => { currentPage = 1; renderArticles(); });
+    document.getElementById('article-sort').addEventListener('change', () => { currentPage = 1; renderArticles(); });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (!App.requireAuth()) return;
+        App.initSidebar();
+        setView('grid');
+        loadArticles();
+        // Load image models for editor
+        (async () => {
+            try {
+                const d = await API.get('/publish/image-models'); const s = document.getElementById('editor-image-model');
+                if (s && d.models) d.models.forEach(m => { const o = document.createElement('option'); o.value = m.key; o.textContent = `${m.name} (${m.provider})`; s.appendChild(o); });
+            } catch { }
+        })();
+    });
+</script>
+{% endblock %}

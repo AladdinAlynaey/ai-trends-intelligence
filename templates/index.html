@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}AI Trends Intelligence Platform{% endblock %}
+
+{% block body %}
+<div class="auth-container" style="flex-direction: column; gap: 40px;">
+    <div style="text-align: center; max-width: 600px;">
+        <div class="auth-logo"
+            style="width: 72px; height: 72px; font-size: 36px; margin: 0 auto 24px; box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);">
+            🧠</div>
+        <h1
+            style="font-size: 42px; font-weight: 800; margin-bottom: 12px; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+            AI Trends Intelligence</h1>
+        <p style="font-size: 18px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 32px;">
+            Track, analyze, and publish global Artificial Intelligence trends in real-time.
+            Powered by advanced AI agents and the world's most authoritative AI sources.
+        </p>
+        <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+            <a href="/login" class="btn btn-primary btn-lg"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+            <a href="/register" class="btn btn-secondary btn-lg"><i class="fas fa-user-plus"></i> Create Account</a>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; max-width: 800px; width: 100%; margin-top: 20px;">
+        <div class="stat-card">
+            <div class="stat-card-icon purple"><i class="fas fa-rss"></i></div>
+            <div style="font-weight: 700; margin-bottom: 4px;">RSS Aggregation</div>
+            <div class="text-sm text-muted">15+ premium AI sources monitored continuously</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon cyan"><i class="fas fa-brain"></i></div>
+            <div style="font-weight: 700; margin-bottom: 4px;">AI Analysis</div>
+            <div class="text-sm text-muted">Multi-agent trend scoring and categorization</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon green"><i class="fas fa-search"></i></div>
+            <div style="font-weight: 700; margin-bottom: 4px;">AI Search</div>
+            <div class="text-sm text-muted">Perplexity-style intelligent search engine</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-icon amber"><i class="fas fa-paper-plane"></i></div>
+            <div style="font-weight: 700; margin-bottom: 4px;">Auto-Publishing</div>
+            <div class="text-sm text-muted">Multi-platform content generation & posting</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (API.isLoggedIn()) window.location.href = '/dashboard';
+</script>
+{% endblock %}

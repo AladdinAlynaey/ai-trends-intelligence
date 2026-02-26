@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Register — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">🧠</div>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join the AI Trends Intelligence Platform</p>
+        </div>
+
+        <form id="register-form" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label class="form-label" for="reg-username">Username</label>
+                <input type="text" id="reg-username" class="form-input" placeholder="3-30 chars, letters, numbers, _, -"
+                    required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-email">Email Address</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="you@example.com" required
+                    autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-password">Password</label>
+                <input type="password" id="reg-password" class="form-input"
+                    placeholder="Min 8 chars, uppercase, lowercase, digit, special" required
+                    autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="reg-confirm">Confirm Password</label>
+                <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat your password" required
+                    autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full" id="register-btn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+        </form>
+
+        <div class="auth-divider"><span>Already have an account?</span></div>
+
+        <a href="/login" class="btn btn-secondary w-full">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    if (API.isLoggedIn()) window.location.href = '/dashboard';
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        const btn = document.getElementById('register-btn');
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm').value;
+
+        if (password !== confirm) {
+            App.showToast('Passwords do not match', 'warning');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Creating...';
+
+        try {
+            await API.register(username, email, password);
+            App.showToast('Account created! Please sign in.', 'success');
+            setTimeout(() => window.location.href = '/login', 1000);
+        } catch (err) {
+            App.showToast(err.message || 'Registration failed', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+        }
+    }
+</script>
+{% endblock %}

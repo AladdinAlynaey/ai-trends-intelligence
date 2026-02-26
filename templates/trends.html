@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}Trends — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">AI Trends</h1>
+            </div>
+            <div class="top-bar-right" style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="App.refreshArticles()"
+                    title="Fetch new articles from RSS feeds">
+                    <i class="fas fa-rss"></i> Refresh Feeds
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="App.runAnalysis()" title="Analyze articles with AI">
+                    <i class="fas fa-brain"></i> Run Analysis
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Filters -->
+            <div class="card mb-6">
+                <div class="card-body" style="padding: 16px;">
+                    <div
+                        style="display: grid; grid-template-columns: 1fr 120px 150px 1fr auto; gap: 12px; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Search</label>
+                            <input type="text" class="form-input" id="filter-search" placeholder="Search trends..."
+                                onkeyup="if(event.key==='Enter') App.filterTrends()">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Min Score</label>
+                            <input type="number" class="form-input" id="filter-min-score" placeholder="0" min="0"
+                                max="100">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Sort By</label>
+                            <select class="form-select" id="filter-sort">
+                                <option value="trend_score">Score</option>
+                                <option value="date">Date</option>
+                                <option value="category">Category</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="filter-category">
+                                <option value="">All Categories</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="App.filterTrends()" style="height: 42px;">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trends List -->
+            <div id="trends-list">
+                <div class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="trends-pagination" style="display:flex; gap:4px; justify-content:center; margin-top: 20px;"></div>
+        </div>
+    </main>
+</div>
+
+<!-- Content Modal -->
+<div class="modal-overlay" id="content-modal">
+    <div class="modal" style="max-width: 640px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-magic" style="color: var(--accent-primary);"></i> AI Generated Content</h3>
+            <button class="modal-close" onclick="App.closeModal('content-modal')"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <div class="card-body"
+                    style="background: var(--bg-glass); border-radius: 8px; padding: 12px; font-weight: 600;"
+                    id="modal-content-title"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hook</label>
+                <div class="card-body"
+                    style="background: var(--bg-glass); border-radius: 8px; padding: 12px; color: var(--accent-primary);"
+                    id="modal-content-hook"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Body</label>
+                <div class="card-body"
+                    style="background: var(--bg-glass); border-radius: 8px; padding: 12px; white-space: pre-wrap;"
+                    id="modal-content-body"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Call to Action</label>
+                <div class="card-body"
+                    style="background: var(--bg-glass); border-radius: 8px; padding: 12px; color: var(--accent-secondary);"
+                    id="modal-content-cta"></div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hashtags</label>
+                <div class="card-body"
+                    style="background: var(--bg-glass); border-radius: 8px; padding: 12px; color: var(--text-accent);"
+                    id="modal-content-hashtags"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Post Editor Modal -->
+<div class="modal-overlay" id="post-editor-modal">
+    <div class="modal" style="max-width: 680px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-pen-fancy" style="color: var(--accent-primary);"></i> Create & Publish Post</h3>
+            <button class="modal-close" onclick="App.closeModal('post-editor-modal')"><i
+                    class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Post Language</label>
+                <select class="form-select" id="editor-language">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇸🇦 Arabic (العربية)</option>
+                    <option value="fr">🇫🇷 French</option>
+                    <option value="es">🇪🇸 Spanish</option>
+                    <option value="de">🇩🇪 German</option>
+                    <option value="zh">🇨🇳 Chinese</option>
+                    <option value="ja">🇯🇵 Japanese</option>
+                    <option value="ko">🇰🇷 Korean</option>
+                    <option value="pt">🇧🇷 Portuguese</option>
+                    <option value="ru">🇷🇺 Russian</option>
+                    <option value="tr">🇹🇷 Turkish</option>
+                    <option value="hi">🇮🇳 Hindi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Title *</label>
+                <input type="text" class="form-input" id="editor-title" placeholder="Catchy headline...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Body *</label>
+                <textarea class="form-textarea" id="editor-body" rows="6" placeholder="Your post content..."></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Call to Action</label>
+                <input type="text" class="form-input" id="editor-cta" placeholder="💡 Follow for more AI updates!">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hashtags</label>
+                <input type="text" class="form-input" id="editor-hashtags" placeholder="#AI #MachineLearning #Tech">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Source Link (optional)</label>
+                <input type="text" class="form-input" id="editor-link" placeholder="https://...">
+            </div>
+
+            <!-- Platform Selection -->
+            <div class="form-group">
+                <label class="form-label">Publish To</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label class="platform-check" title="Telegram">
+                        <input type="checkbox" id="editor-plat-telegram" checked>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#0088cc">
+                            <path
+                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="X (Twitter)">
+                        <input type="checkbox" id="editor-plat-twitter">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="LinkedIn">
+                        <input type="checkbox" id="editor-plat-linkedin">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="#0A66C2">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Image Generation -->
+            <div class="form-group"
+                style="padding: 14px; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border);">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="editor-gen-image" checked
+                            style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                        <span>🎨 Generate AI Image</span>
+                    </label>
+                    <select class="form-select" id="editor-image-model"
+                        style="width: auto; min-width: 160px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🤖 Auto (Best Available)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                    <select class="form-select" id="editor-image-style"
+                        style="width: auto; min-width: 140px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🎨 Auto Style</option>
+                        <option value="digital-art">🖼️ Digital Art</option>
+                        <option value="realistic">📷 Realistic</option>
+                        <option value="abstract">🌀 Abstract</option>
+                        <option value="neon-tech">💡 Neon Tech</option>
+                        <option value="minimalist">✨ Minimalist</option>
+                    </select>
+                    <select class="form-select" id="editor-image-size"
+                        style="width: auto; min-width: 140px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">📐 Auto Size</option>
+                        <option value="landscape">🖥️ Landscape</option>
+                        <option value="square">⬜ Square</option>
+                        <option value="portrait">📱 Portrait</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-full btn-lg" id="editor-publish-btn" onclick="App.publishFromEditor()"
+                style="font-size: 15px; padding: 14px;">
+                <i class="fas fa-paper-plane"></i> Publish Post
+            </button>
+            <div id="editor-result" style="margin-top: 12px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Load image models for editor
+    (async () => {
+        try {
+            const data = await API.get('/publish/image-models');
+            const sel = document.getElementById('editor-image-model');
+            if (sel && data.models) {
+                data.models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.key;
+                    opt.textContent = `${m.name} (${m.provider})`;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch { }
+    })();
+    document.addEventListener('DOMContentLoaded', App.loadTrends);
+</script>
+{% endblock %}

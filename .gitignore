@@ -1,0 +1,45 @@
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Data (contains user data & tokens)
+data/articles.json
+data/users.json
+data/tokens.json
+data/trends.json
+data/search_cache.json
+data/publish_queue.json
+data/publish_history.json
+data/feeds.json
+data/audit/
+data/generated/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PM2
+logs/
+*.pid
+
+# Misc
+*.log

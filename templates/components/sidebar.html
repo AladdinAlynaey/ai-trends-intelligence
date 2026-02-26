@@ -1,0 +1,44 @@
+<!-- Reusable sidebar component included in app layout pages -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🧠</div>
+            <div>
+                <div class="logo-text">AI Trends</div>
+                <div class="logo-badge">INTELLIGENCE</div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a href="/dashboard" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+            <a href="/trends" class="nav-item"><i class="fas fa-chart-line"></i> Trends</a>
+            <a href="/articles" class="nav-item"><i class="fas fa-newspaper"></i> Articles</a>
+            <a href="/search" class="nav-item"><i class="fas fa-search"></i> AI Search</a>
+            <a href="/publish" class="nav-item"><i class="fas fa-paper-plane"></i> Publishing</a>
+        </div>
+
+        <div class="nav-section" id="admin-nav-section" style="display: none;">
+            <div class="nav-section-title">Admin</div>
+            <a href="/admin" class="nav-item"><i class="fas fa-shield-halved"></i> Control Panel</a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Account</div>
+            <a href="/settings" class="nav-item"><i class="fas fa-gear"></i> Settings</a>
+            <a href="#" class="nav-item" id="logout-btn"><i class="fas fa-right-from-bracket"></i> Logout</a>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="user-info">
+            <div class="user-avatar" id="sidebar-user-avatar">A</div>
+            <div class="user-details">
+                <div class="user-name" id="sidebar-user-name">User</div>
+                <div class="user-role" id="sidebar-user-role">user</div>
+            </div>
+        </div>
+    </div>
+</aside>

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">Admin Control Panel</h1>
+            </div>
+            <div class="top-bar-right">
+                <button class="btn btn-sm btn-secondary" onclick="App.refreshAllFeeds()"><i class="fas fa-rss"></i>
+                    Refresh Feeds</button>
+                <button class="btn btn-sm btn-primary" onclick="App.triggerAnalysis()"><i class="fas fa-brain"></i> Run
+                    Analysis</button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- System Stats -->
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-card-icon purple"><i class="fas fa-newspaper"></i></div>
+                    <div class="stat-value" id="admin-stat-articles">0</div>
+                    <div class="stat-label">Total Articles</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon cyan"><i class="fas fa-microscope"></i></div>
+                    <div class="stat-value" id="admin-stat-analyzed">0</div>
+                    <div class="stat-label">Analyzed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon green"><i class="fas fa-rss"></i></div>
+                    <div class="stat-value" id="admin-stat-feeds">0</div>
+                    <div class="stat-label">Feeds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon blue"><i class="fas fa-users"></i></div>
+                    <div class="stat-value" id="admin-stat-users">0</div>
+                    <div class="stat-label">Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon amber"><i class="fas fa-paper-plane"></i></div>
+                    <div class="stat-value" id="admin-stat-published">0</div>
+                    <div class="stat-label">Published</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-card-icon red"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value" id="admin-stat-queue">0</div>
+                    <div class="stat-label">In Queue</div>
+                </div>
+            </div>
+
+            <!-- Add Feed -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-plus-circle"></i> Add RSS Feed</div>
+                </div>
+                <div class="card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 2fr 1fr auto; gap: 12px; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Feed Name</label>
+                            <input type="text" class="form-input" id="new-feed-name" placeholder="e.g. OpenAI Blog">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">RSS URL</label>
+                            <input type="url" class="form-input" id="new-feed-url"
+                                placeholder="https://example.com/feed.xml">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="new-feed-category">
+                                <option>Research</option>
+                                <option selected>Industry</option>
+                                <option>Product</option>
+                                <option>Open Source</option>
+                                <option>Hardware</option>
+                                <option>Policy</option>
+                                <option>Ethics</option>
+                                <option>Funding</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="App.addNewFeed()" style="height: 42px;"><i
+                                class="fas fa-plus"></i> Add</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feeds Table -->
+            <div class="card mb-6">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-rss"></i> RSS Feeds</div>
+                    <span class="text-muted text-sm" id="feeds-count"></span>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>URL</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Articles</th>
+                                    <th>Last Fetched</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="feeds-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted" style="padding: 40px;">Loading
+                                        feeds...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title"><i class="fas fa-users"></i> User Management</div>
+                </div>
+                <div class="card-body" style="padding: 0;">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted" style="padding: 40px;">Loading
+                                        users...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>document.addEventListener('DOMContentLoaded', App.loadAdmin);</script>
+{% endblock %}

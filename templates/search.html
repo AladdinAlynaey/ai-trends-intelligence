@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+{% block title %}AI Search — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">AI Research Engine</h1>
+            </div>
+            <div class="top-bar-right" style="display: flex; gap: 8px;">
+                <button class="btn btn-sm btn-secondary" onclick="App.refreshArticles()">
+                    <i class="fas fa-rss"></i> Refresh Feeds
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="App.runAnalysis()">
+                    <i class="fas fa-brain"></i> Run Analysis
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <!-- Search Hero -->
+            <div style="text-align: center; padding: 40px 0 28px;">
+                <div style="font-size: 56px; margin-bottom: 8px;">🔬</div>
+                <h2
+                    style="font-size: 32px; font-weight: 800; margin-bottom: 10px; background: linear-gradient(135deg, #8b5cf6, #06b6d4, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    AI Research Engine</h2>
+                <p style="color: var(--text-secondary); font-size: 16px; max-width: 600px; margin: 0 auto;">
+                    Search <span id="article-count" style="color: var(--accent-primary); font-weight: 700;">0</span>
+                    articles from 50+ sources + real-time web results powered by AI
+                </p>
+            </div>
+
+            <!-- Search Input -->
+            <div style="max-width: 740px; margin: 0 auto;">
+                <div class="search-box" style="margin-bottom: 16px; position: relative;">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="search-input" id="search-query"
+                        placeholder="Ask anything about AI, cybersecurity, technology..."
+                        onkeyup="if(event.key==='Enter') doSearch()"
+                        style="font-size: 16px; padding: 16px 50px 16px 44px;">
+                    <button class="search-btn" onclick="doSearch()" style="padding: 10px 16px;">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <!-- Suggestions -->
+                <div id="search-suggestions"
+                    style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px;">
+                    <button class="suggestion-chip"
+                        onclick="doSearch('Latest breakthrough in LLMs and transformers')">🧠 LLM Breakthroughs</button>
+                    <button class="suggestion-chip" onclick="doSearch('AI regulation and policy worldwide')">⚖️ AI
+                        Regulation</button>
+                    <button class="suggestion-chip" onclick="doSearch('Open source AI models released recently')">🔓
+                        Open Source AI</button>
+                    <button class="suggestion-chip" onclick="doSearch('New AI tools and developer frameworks')">🛠 AI
+                        Tools</button>
+                    <button class="suggestion-chip" onclick="doSearch('AI cybersecurity threats and defense')">🔒 AI +
+                        Security</button>
+                    <button class="suggestion-chip" onclick="doSearch('Latest AI startup funding rounds')">💰 AI
+                        Funding</button>
+                    <button class="suggestion-chip" onclick="doSearch('Robotics and embodied AI progress')">🤖
+                        Robotics</button>
+                    <button class="suggestion-chip" onclick="doSearch('AGI progress and timelines')">🚀 AGI
+                        Progress</button>
+                    <button class="suggestion-chip" onclick="doSearch('AI in healthcare and drug discovery')">🏥 AI
+                        Healthcare</button>
+                    <button class="suggestion-chip" onclick="doSearch('AI ethics bias and fairness')">⚠️ AI
+                        Ethics</button>
+                </div>
+            </div>
+
+            <!-- Search Result -->
+            <div id="search-result" style="max-width: 780px; margin: 0 auto;"></div>
+
+            <!-- Loading -->
+            <div id="search-loading" style="display: none; text-align: center; padding: 60px 0;">
+                <div class="spinner" style="width: 50px; height: 50px; margin: 0 auto 16px;"></div>
+                <p style="color: var(--text-secondary); font-size: 15px;">🔍 Searching articles + web + synthesizing
+                    with AI...</p>
+                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">This may take 10-15 seconds for
+                    deep analysis</p>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Post Editor Modal -->
+<div class="modal-overlay" id="post-editor-modal">
+    <div class="modal" style="max-width: 700px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-pen-fancy" style="color: var(--accent-primary);"></i> Create & Publish Post</h3>
+            <button class="modal-close" onclick="App.closeModal('post-editor-modal')"><i
+                    class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Post Language</label>
+                <select class="form-select" id="editor-language">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="ar">🇸🇦 Arabic (العربية)</option>
+                    <option value="fr">🇫🇷 French</option>
+                    <option value="es">🇪🇸 Spanish</option>
+                    <option value="de">🇩🇪 German</option>
+                    <option value="zh">🇨🇳 Chinese</option>
+                    <option value="ja">🇯🇵 Japanese</option>
+                    <option value="ko">🇰🇷 Korean</option>
+                    <option value="pt">🇧🇷 Portuguese</option>
+                    <option value="ru">🇷🇺 Russian</option>
+                    <option value="tr">🇹🇷 Turkish</option>
+                    <option value="hi">🇮🇳 Hindi</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Title *</label>
+                <input type="text" class="form-input" id="editor-title" placeholder="Catchy headline...">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Post Body *</label>
+                <textarea class="form-textarea" id="editor-body" rows="7"
+                    placeholder="Your post content... Edit freely before publishing!"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Call to Action</label>
+                <input type="text" class="form-input" id="editor-cta" placeholder="💡 Follow for more AI updates!">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Hashtags</label>
+                <input type="text" class="form-input" id="editor-hashtags" placeholder="#AI #MachineLearning #Tech">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Source Link (optional)</label>
+                <input type="text" class="form-input" id="editor-link" placeholder="https://...">
+            </div>
+
+            <!-- Platform Selection -->
+            <div class="form-group">
+                <label class="form-label">Publish To</label>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <label class="platform-check" title="Telegram">
+                        <input type="checkbox" id="editor-plat-telegram" checked>
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="#0088cc">
+                            <path
+                                d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="X (Twitter)">
+                        <input type="checkbox" id="editor-plat-twitter">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </label>
+                    <label class="platform-check" title="LinkedIn">
+                        <input type="checkbox" id="editor-plat-linkedin">
+                        <svg viewBox="0 0 24 24" width="19" height="19" fill="#0A66C2">
+                            <path
+                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                        </svg>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Image Generation -->
+            <div class="form-group"
+                style="padding: 14px; background: var(--bg-glass); border-radius: 10px; border: 1px solid var(--border);">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="editor-gen-image" checked
+                            style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                        <span>🎨 Generate AI Image</span>
+                    </label>
+                    <select class="form-select" id="editor-image-model"
+                        style="width: auto; min-width: 160px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🤖 Auto (Best Available)</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                    <select class="form-select" id="editor-image-style"
+                        style="width: auto; min-width: 140px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">🎨 Auto Style</option>
+                        <option value="digital-art">🖼️ Digital Art</option>
+                        <option value="realistic">📷 Realistic</option>
+                        <option value="abstract">🌀 Abstract</option>
+                        <option value="neon-tech">💡 Neon Tech</option>
+                        <option value="minimalist">✨ Minimalist</option>
+                    </select>
+                    <select class="form-select" id="editor-image-size"
+                        style="width: auto; min-width: 140px; padding: 6px 10px; font-size: 12px;">
+                        <option value="auto">📐 Auto Size</option>
+                        <option value="landscape">🖥️ Landscape</option>
+                        <option value="square">⬜ Square</option>
+                        <option value="portrait">📱 Portrait</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-full btn-lg" id="editor-publish-btn" onclick="App.publishFromEditor()"
+                style="font-size: 15px; padding: 14px;">
+                <i class="fas fa-paper-plane"></i> Publish Post
+            </button>
+            <div id="editor-result" style="margin-top: 12px;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function doSearch(query) {
+        if (query) document.getElementById('search-query').value = query;
+        const q = document.getElementById('search-query')?.value?.trim();
+        if (!q) return App.showToast('Enter a search query', 'warning');
+
+        const el = document.getElementById('search-result');
+        const loading = document.getElementById('search-loading');
+        const suggestions = document.getElementById('search-suggestions');
+
+        el.innerHTML = '';
+        loading.style.display = 'block';
+        if (suggestions) suggestions.style.display = 'none';
+
+        try {
+            const result = await API.search(q);
+            loading.style.display = 'none';
+            renderSearchResult(result);
+            // Save to sessionStorage so results persist when navigating away
+            sessionStorage.setItem('ai_search_query', q);
+            sessionStorage.setItem('ai_search_result', JSON.stringify(result));
+        } catch (err) {
+            loading.style.display = 'none';
+            if (suggestions) suggestions.style.display = 'flex';
+            App.showToast(err.message || 'Search failed', 'error');
+        }
+    }
+
+    function renderSearchResult(result) {
+        const el = document.getElementById('search-result');
+        if (!el) return;
+
+        const answer = result.answer || 'No results found.';
+        const insights = result.key_insights || [];
+        const sources = result.sources_used || [];
+        const related = result.related_trends || [];
+        const suggested = result.suggested_post || {};
+        const confidence = result.confidence || 0;
+
+        el.innerHTML = `
+    <!-- Stats Bar -->
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center;">
+      <span class="tag info"><i class="fas fa-database"></i> ${result.articles_searched || 0} articles</span>
+      <span class="tag success"><i class="fas fa-check"></i> ${result.articles_matched || 0} matches</span>
+      <span class="tag" style="background: #8b5cf6;"><i class="fas fa-globe"></i> ${result.web_results || 0} web sources</span>
+      <span class="tag ${confidence > 0.7 ? 'success' : 'warning'}">
+        <i class="fas fa-chart-line"></i> ${(confidence * 100).toFixed(0)}% confidence
+      </span>
+    </div>
+
+    <!-- Answer -->
+    <div class="card mb-6">
+      <div class="card-body" style="padding: 24px;">
+        <div class="search-answer" style="font-size: 15px; line-height: 1.8;">${formatMd(answer)}</div>
+      </div>
+    </div>
+
+    ${insights.length ? `
+    <!-- Key Insights -->
+    <div class="card mb-6">
+      <div class="card-header"><div class="card-title"><i class="fas fa-lightbulb" style="color: #f59e0b;"></i> Key Insights</div></div>
+      <div class="card-body">
+        <div style="display: grid; gap: 10px;">
+          ${insights.map((i, idx) => `
+            <div style="display: flex; gap: 12px; align-items: flex-start; padding: 10px; background: var(--bg-glass); border-radius: 8px;">
+              <span style="background: var(--accent-primary); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">${idx + 1}</span>
+              <span style="font-size: 14px; color: var(--text-secondary);">${App.escapeHtml(i)}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${sources.length ? `
+    <!-- Sources -->
+    <div class="card mb-6">
+      <div class="card-header"><div class="card-title"><i class="fas fa-link" style="color: var(--accent-secondary);"></i> Sources</div></div>
+      <div class="card-body">
+        <div style="display: grid; gap: 8px;">
+          ${sources.map(s => `
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--bg-glass); border-radius: 8px;">
+              <span class="tag ${s.relevance === 'high' ? 'success' : s.relevance === 'medium' ? 'warning' : ''}" style="font-size: 11px;">${s.relevance || 'low'}</span>
+              <span style="font-size: 13px; flex: 1;">${App.escapeHtml(s.title || 'Unknown')}</span>
+              ${s.url ? `<a href="${s.url}" target="_blank" style="color: var(--accent-primary); font-size: 12px;"><i class="fas fa-external-link-alt"></i></a>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>` : ''}
+
+    ${related.length ? `
+    <!-- Related Trends -->
+    <div style="margin-bottom: 20px;">
+      <h4 style="font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">Related Topics</h4>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        ${related.map(r => `<button class="suggestion-chip" onclick="doSearch('${App.escapeHtml(r)}')">${App.escapeHtml(r)}</button>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- CREATE POST -->
+    <div class="card" style="border: 1px solid rgba(139, 92, 246, 0.4); background: rgba(139, 92, 246, 0.08);">
+      <div class="card-body" style="padding: 20px;">
+        <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--accent-primary);">
+          <i class="fas fa-magic" style="margin-right: 8px;"></i>Turn This Into a Post
+        </h4>
+        ${suggested.title ? `
+          <div style="padding: 12px; background: var(--bg-glass); border-radius: 8px; margin-bottom: 14px;">
+            <strong style="font-size: 14px; color: var(--text-primary);">${App.escapeHtml(suggested.title)}</strong>
+            ${suggested.body ? `<p style="font-size: 13px; color: var(--text-secondary); margin-top: 6px;">${App.escapeHtml(suggested.body).substring(0, 200)}...</p>` : ''}
+          </div>` : ''}
+        <button class="btn btn-primary btn-lg w-full" onclick='App.openPostEditor(${JSON.stringify(suggested).replace(/'/g, "\\u0027")})'>
+          <i class="fas fa-pen-fancy"></i> Open Post Editor — Edit Before Publishing
+        </button>
+      </div>
+    </div>
+  `;
+    }
+
+    function formatMd(text) {
+        if (!text) return '';
+        return text
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^### (.*$)/gm, '<h3 style="font-size:17px;font-weight:700;margin:16px 0 8px;color:var(--accent-primary);">$1</h3>')
+            .replace(/^## (.*$)/gm, '<h2 style="font-size:19px;font-weight:700;margin:20px 0 10px;">$1</h2>')
+            .replace(/^# (.*$)/gm, '<h1 style="font-size:22px;font-weight:800;margin:20px 0 10px;">$1</h1>')
+            .replace(/^- (.*$)/gm, '<li style="margin-left:16px;margin-bottom:4px;">$1</li>')
+            .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--accent-primary);">$1</a>')
+            .replace(/\n\n/g, '</p><p style="margin-bottom:12px;">')
+            .replace(/\n/g, '<br>');
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!App.requireAuth()) return;
+        App.initSidebar();
+        // Load article count
+        try {
+            const stats = await API.getTrendStats();
+            const el = document.getElementById('article-count');
+            if (el) el.textContent = stats.total_articles || 0;
+        } catch { }
+        // Load image models
+        try {
+            const data = await API.get('/publish/image-models');
+            const sel = document.getElementById('editor-image-model');
+            if (sel && data.models) {
+                data.models.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.key;
+                    opt.textContent = `${m.name} (${m.provider})`;
+                    sel.appendChild(opt);
+                });
+            }
+        } catch { }
+
+        // Restore search results from sessionStorage if available
+        const savedQuery = sessionStorage.getItem('ai_search_query');
+        const savedResult = sessionStorage.getItem('ai_search_result');
+        if (savedQuery && savedResult) {
+            document.getElementById('search-query').value = savedQuery;
+            const suggestions = document.getElementById('search-suggestions');
+            if (suggestions) suggestions.style.display = 'none';
+            try {
+                renderSearchResult(JSON.parse(savedResult));
+            } catch { }
+        }
+    });
+</script>
+{% endblock %}

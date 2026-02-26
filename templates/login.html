@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Login — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">🧠</div>
+            <h1 class="auth-title">Welcome Back</h1>
+            <p class="auth-subtitle">Sign in to your AI Trends account</p>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label class="form-label" for="login-username">Username or Email</label>
+                <input type="text" id="login-username" class="form-input" placeholder="Enter your username or email"
+                    required autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="login-password">Password</label>
+                <input type="password" id="login-password" class="form-input" placeholder="Enter your password" required
+                    autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-full" id="login-btn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+        </form>
+
+        <div class="auth-divider"><span>New here?</span></div>
+
+        <a href="/register" class="btn btn-secondary w-full">
+            <i class="fas fa-user-plus"></i> Create Account
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Redirect if already logged in
+    if (API.isLoggedIn()) window.location.href = '/dashboard';
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const btn = document.getElementById('login-btn');
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (!username || !password) {
+            App.showToast('Please fill in all fields', 'warning');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Signing in...';
+
+        try {
+            await API.login(username, password);
+            App.showToast('Welcome back!', 'success');
+            setTimeout(() => window.location.href = '/dashboard', 500);
+        } catch (err) {
+            App.showToast(err.message || 'Login failed', 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+        }
+    }
+</script>
+{% endblock %}

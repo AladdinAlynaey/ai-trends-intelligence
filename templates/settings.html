@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+{% block title %}Settings — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">Settings</h1>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div style="max-width: 680px;">
+
+                <!-- Profile -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-user-circle" style="color: var(--accent-primary);"></i>
+                            Profile</div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="form-group">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-input" id="settings-username" readonly
+                                    style="opacity: 0.7;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Role</label>
+                                <input type="text" class="form-input" id="settings-role" readonly style="opacity: 0.7;">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="settings-email" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Display Name</label>
+                            <input type="text" class="form-input" id="settings-display-name"
+                                placeholder="Your display name">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveProfile()">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Change Password -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-lock" style="color: var(--accent-secondary);"></i>
+                            Change Password</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Current Password</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="password" class="form-input" id="current-password"
+                                    placeholder="Enter current password">
+                                <button class="btn btn-sm btn-secondary" onclick="toggleVis('current-password')"><i
+                                        class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="password" class="form-input" id="new-password"
+                                    placeholder="Min 8 chars, uppercase, lowercase, number, special char">
+                                <button class="btn btn-sm btn-secondary" onclick="toggleVis('new-password')"><i
+                                        class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-input" id="confirm-password"
+                                placeholder="Repeat new password">
+                        </div>
+                        <button class="btn btn-primary" onclick="changePassword()">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                        <div id="pwd-result" style="margin-top: 8px;"></div>
+                    </div>
+                </div>
+
+                <!-- API Keys -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-key" style="color: #f59e0b;"></i> API Integrations
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                            Configure your API keys. Changes are saved to the server <code>.env</code> file. Restart the
+                            app after saving.
+                        </p>
+
+                        <!-- OpenRouter -->
+                        <div
+                            style="border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: rgba(139,92,246,0.05);">
+                            <h4
+                                style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--accent-primary);">
+                                🤖 OpenRouter (AI Engine)
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">API Key</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="password" class="form-input" id="settings-openrouter-key"
+                                        placeholder="sk-or-v1-..."
+                                        style="font-family: var(--font-mono); font-size: 12px;">
+                                    <button class="btn btn-sm btn-secondary"
+                                        onclick="toggleVis('settings-openrouter-key')"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                                <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                    Get key at <a href="https://openrouter.ai" target="_blank"
+                                        style="color: var(--accent-primary);">openrouter.ai</a> — Powers content
+                                    generation, search, and image AI
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                                <div class="form-group">
+                                    <label class="form-label">LLM Model</label>
+                                    <select class="form-select" id="settings-llm-model">
+                                        <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+                                        <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                                        <option value="openai/gpt-4o">GPT-4o</option>
+                                        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+                                        <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
+                                        <option value="google/gemini-2.0-pro-exp-02-05">Gemini 2.0 Pro</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Image Model</label>
+                                    <select class="form-select" id="settings-image-model">
+                                        <option value="black-forest-labs/flux-1.1-pro">FLUX 1.1 Pro</option>
+                                        <option value="black-forest-labs/flux-schnell">FLUX Schnell</option>
+                                        <option value="openai/dall-e-3">DALL-E 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Telegram -->
+                        <div
+                            style="border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: rgba(6,182,212,0.05);">
+                            <h4
+                                style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--accent-secondary);">
+                                📱 Telegram Bot
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">Bot Token</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="password" class="form-input" id="settings-telegram-token"
+                                        placeholder="123456789:ABC..."
+                                        style="font-family: var(--font-mono); font-size: 12px;">
+                                    <button class="btn btn-sm btn-secondary"
+                                        onclick="toggleVis('settings-telegram-token')"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Chat ID</label>
+                                <input type="text" class="form-input" id="settings-telegram-chat"
+                                    placeholder="123456789" style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"
+                                    style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                    <input type="checkbox" id="settings-telegram-enabled"
+                                        style="width: 18px; height: 18px; accent-color: var(--accent-secondary);">
+                                    <span>Enable Telegram notifications & publishing</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Twitter/X -->
+                        <div
+                            style="border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: rgba(29,161,242,0.05);">
+                            <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #1DA1F2;">
+                                <i class="fab fa-twitter"></i> Twitter / X
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">API Key (Consumer Key)</label>
+                                <input type="password" class="form-input" id="settings-twitter-key"
+                                    placeholder="Your Twitter API Key"
+                                    style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">API Secret</label>
+                                <input type="password" class="form-input" id="settings-twitter-secret"
+                                    placeholder="Your Twitter API Secret"
+                                    style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Access Token</label>
+                                <input type="password" class="form-input" id="settings-twitter-access"
+                                    placeholder="Your Access Token"
+                                    style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Access Secret</label>
+                                <input type="password" class="form-input" id="settings-twitter-access-secret"
+                                    placeholder="Your Access Token Secret"
+                                    style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Get API keys at <a href="https://developer.twitter.com" target="_blank"
+                                    style="color: #1DA1F2;">developer.twitter.com</a>. Also requires
+                                <code>pip install tweepy</code>.
+                            </div>
+                        </div>
+
+                        <!-- LinkedIn -->
+                        <div
+                            style="border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: rgba(10,102,194,0.05);">
+                            <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #0A66C2;">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">Access Token</label>
+                                <input type="password" class="form-input" id="settings-linkedin-token"
+                                    placeholder="Your LinkedIn OAuth2 Access Token"
+                                    style="font-family: var(--font-mono); font-size: 12px;">
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Get token via <a href="https://www.linkedin.com/developers/" target="_blank"
+                                    style="color: #0A66C2;">LinkedIn Developer</a> OAuth2 flow.
+                            </div>
+                        </div>
+
+                        <!-- Krea.ai -->
+                        <div
+                            style="border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; background: rgba(245,158,11,0.05);">
+                            <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; color: #f59e0b;">
+                                🎨 Krea.ai (Image Generation)
+                            </h4>
+                            <div class="form-group">
+                                <label class="form-label">API Token</label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="password" class="form-input" id="settings-krea-key"
+                                        placeholder="Your Krea.ai API token"
+                                        style="font-family: var(--font-mono); font-size: 12px;">
+                                    <button class="btn btn-sm btn-secondary" onclick="toggleVis('settings-krea-key')"><i
+                                            class="fas fa-eye"></i></button>
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">
+                                Get API token at <a href="https://krea.ai/settings/api-tokens" target="_blank"
+                                    style="color: #f59e0b;">krea.ai/settings/api-tokens</a>. Enables FLUX, Nano Banana
+                                Pro, and more image models.
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-full btn-lg" onclick="saveAPIKeys()">
+                            <i class="fas fa-save"></i> Save All API Settings
+                        </button>
+                        <div id="api-key-status" style="margin-top: 12px;"></div>
+                    </div>
+                </div>
+
+                <!-- Notification Preferences -->
+                <div class="card mb-6">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-bell" style="color: #f59e0b;"></i> Notifications</div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" id="notify-new-trends" checked
+                                    style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                                <span>📈 Notify on new high-impact trends (score ≥ 70)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" id="notify-new-articles" checked
+                                    style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                                <span>📰 Notify on new article batch fetches</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" id="notify-publish" checked
+                                    style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                                <span>📤 Notify on post published</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <input type="checkbox" id="notify-errors" checked
+                                    style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                                <span>⚠️ Notify on system errors</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fas fa-info-circle"></i> System Information</div>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; gap: 10px; font-size: 14px; color: var(--text-secondary);">
+                            <div style="display: flex; justify-content: space-between;"><span>Platform</span><span
+                                    class="tag">AI Trends Intelligence v2.0</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>Total Feeds</span><span
+                                    class="tag info" id="sys-feeds">—</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>Total Articles</span><span
+                                    class="tag info" id="sys-articles">—</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>AI Status</span><span
+                                    class="tag" id="ai-config-tag">Checking...</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>Telegram</span><span
+                                    class="tag" id="tg-config-tag">Checking...</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>Twitter</span><span
+                                    class="tag" id="tw-config-tag">Checking...</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>LinkedIn</span><span
+                                    class="tag" id="li-config-tag">Checking...</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span>Krea.ai</span><span
+                                    class="tag" id="krea-config-tag">Checking...</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleVis(id) {
+        const el = document.getElementById(id);
+        if (el) el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    async function saveProfile() {
+        const email = document.getElementById('settings-email')?.value?.trim();
+        const displayName = document.getElementById('settings-display-name')?.value?.trim();
+        try {
+            await API.post('/auth/update-profile', { email, display_name: displayName });
+            App.showToast('✅ Profile updated!', 'success');
+        } catch (err) {
+            App.showToast(err.message || 'Failed to update profile', 'error');
+        }
+    }
+
+    async function changePassword() {
+        const current = document.getElementById('current-password')?.value;
+        const newPwd = document.getElementById('new-password')?.value;
+        const confirm = document.getElementById('confirm-password')?.value;
+        const resEl = document.getElementById('pwd-result');
+
+        if (!current || !newPwd) return App.showToast('Fill in all fields', 'warning');
+        if (newPwd !== confirm) return App.showToast('Passwords do not match', 'error');
+        if (newPwd.length < 8) return App.showToast('Password must be at least 8 characters', 'error');
+
+        try {
+            await API.post('/auth/change-password', { current_password: current, new_password: newPwd });
+            App.showToast('✅ Password changed!', 'success');
+            if (resEl) resEl.innerHTML = '<span class="tag success"><i class="fas fa-check"></i> Password changed successfully</span>';
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        } catch (err) {
+            App.showToast(err.message || 'Password change failed', 'error');
+            if (resEl) resEl.innerHTML = `<span class="tag" style="background:var(--accent-danger);">${err.message || 'Failed'}</span>`;
+        }
+    }
+
+    async function saveAPIKeys() {
+        const data = {
+            openrouter_api_key: document.getElementById('settings-openrouter-key')?.value?.trim(),
+            telegram_bot_token: document.getElementById('settings-telegram-token')?.value?.trim(),
+            telegram_admin_chat_id: document.getElementById('settings-telegram-chat')?.value?.trim(),
+            telegram_enabled: document.getElementById('settings-telegram-enabled')?.checked,
+            llm_model: document.getElementById('settings-llm-model')?.value,
+            image_model: document.getElementById('settings-image-model')?.value,
+            twitter_api_key: document.getElementById('settings-twitter-key')?.value?.trim(),
+            twitter_api_secret: document.getElementById('settings-twitter-secret')?.value?.trim(),
+            twitter_access_token: document.getElementById('settings-twitter-access')?.value?.trim(),
+            twitter_access_secret: document.getElementById('settings-twitter-access-secret')?.value?.trim(),
+            linkedin_access_token: document.getElementById('settings-linkedin-token')?.value?.trim(),
+            krea_api_key: document.getElementById('settings-krea-key')?.value?.trim(),
+        };
+
+        try {
+            await API.post('/auth/save-keys', data);
+            App.showToast('✅ All API Keys saved! Restart the app for changes to take effect.', 'success', 6000);
+            document.getElementById('api-key-status').innerHTML =
+                '<span class="tag success"><i class="fas fa-check"></i> Saved — restart app to apply</span>';
+        } catch (err) {
+            App.showToast(err.message || 'Failed to save keys', 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!App.requireAuth()) return;
+        App.initSidebar();
+
+        // Load profile
+        try {
+            const user = await API.getMe();
+            document.getElementById('settings-username').value = user.username || '';
+            document.getElementById('settings-email').value = user.email || '';
+            document.getElementById('settings-display-name').value = user.display_name || user.username || '';
+            document.getElementById('settings-role').value = (user.role || 'user').toUpperCase();
+        } catch { }
+
+        // Load platform status
+        try {
+            const status = await API.getAIStatus();
+            const setTag = (id, ok) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = ok ? 'tag success' : 'tag warning';
+                el.textContent = ok ? '✅ Active' : '⚠ Not Set';
+            };
+            setTag('ai-config-tag', status.ai_configured);
+            setTag('tg-config-tag', status.telegram_configured);
+            setTag('tw-config-tag', status.twitter_configured);
+            setTag('li-config-tag', status.linkedin_configured);
+            setTag('krea-config-tag', status.krea_configured);
+            if (status.telegram_configured) document.getElementById('settings-telegram-enabled').checked = true;
+        } catch { }
+
+        // Load stats
+        try {
+            const stats = await API.getTrendStats();
+            document.getElementById('sys-feeds').textContent = stats.total_feeds || 0;
+            document.getElementById('sys-articles').textContent = stats.total_articles || 0;
+        } catch { }
+    });
+</script>
+{% endblock %}

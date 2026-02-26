@@ -1,0 +1,470 @@
+{% extends "base.html" %}
+{% block title %}Publishing — AI Trends Intelligence{% endblock %}
+
+{% block body %}
+<div class="app-layout">
+    {% include "components/sidebar.html" %}
+
+    <main class="main-content">
+        <header class="top-bar">
+            <div class="top-bar-left">
+                <button class="menu-toggle" id="menu-toggle"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">Publishing Studio</h1>
+            </div>
+            <div class="top-bar-right" style="display: flex; gap: 8px; align-items: center;">
+                <span class="tag" id="tg-status">—</span>
+                <span class="tag" id="tw-status">—</span>
+                <span class="tag" id="li-status">—</span>
+                <span class="tag" id="ai-status">—</span>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="publish-layout" style="display: grid; grid-template-columns: 1fr 330px; gap: 24px;">
+
+                <!-- Main Editor -->
+                <div>
+                    <!-- Fill from Trend -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-bolt" style="color: var(--accent-primary);"></i>
+                                Quick Fill from Saved Trend</div>
+                        </div>
+                        <div class="card-body" style="padding: 16px;">
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <select class="form-select" id="trend-selector" style="flex: 1; min-width: 200px;">
+                                    <option value="">Select a trend to fill the editor...</option>
+                                </select>
+                                <button class="btn btn-sm btn-secondary" onclick="fillFromTrend()">
+                                    <i class="fas fa-fill-drip"></i> Fill
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="fillWithAI()">
+                                    <i class="fas fa-magic"></i> AI Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post Composer -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-pen-fancy"
+                                    style="color: var(--accent-primary);"></i> Compose Post</div>
+                        </div>
+                        <div class="card-body">
+                            <!-- Language & Platforms Row -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">Post Language</label>
+                                    <select class="form-select" id="pub-language">
+                                        <option value="en">🇺🇸 English</option>
+                                        <option value="ar">🇸🇦 Arabic (العربية)</option>
+                                        <option value="fr">🇫🇷 French</option>
+                                        <option value="es">🇪🇸 Spanish</option>
+                                        <option value="de">🇩🇪 German</option>
+                                        <option value="zh">🇨🇳 Chinese</option>
+                                        <option value="ja">🇯🇵 Japanese</option>
+                                        <option value="ko">🇰🇷 Korean</option>
+                                        <option value="pt">🇧🇷 Portuguese</option>
+                                        <option value="ru">🇷🇺 Russian</option>
+                                        <option value="tr">🇹🇷 Turkish</option>
+                                        <option value="hi">🇮🇳 Hindi</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Publish To</label>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; padding-top: 2px;">
+                                        <label class="platform-check">
+                                            <input type="checkbox" id="plat-telegram" checked>
+                                            <svg viewBox="0 0 24 24" width="18" height="18" fill="#0088cc">
+                                                <path
+                                                    d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                                            </svg>
+                                            <span>Telegram</span>
+                                        </label>
+                                        <label class="platform-check">
+                                            <input type="checkbox" id="plat-twitter">
+                                            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                                                <path
+                                                    d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                            </svg>
+                                            <span>𝕏</span>
+                                        </label>
+                                        <label class="platform-check">
+                                            <input type="checkbox" id="plat-linkedin">
+                                            <svg viewBox="0 0 24 24" width="16" height="16" fill="#0A66C2">
+                                                <path
+                                                    d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                            </svg>
+                                            <span>LinkedIn</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Title *</label>
+                                <input type="text" class="form-input" id="pub-title"
+                                    placeholder="Enter a catchy headline...">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Body *</label>
+                                <textarea class="form-textarea" id="pub-body" rows="7"
+                                    placeholder="Write your post content here... Edit freely before publishing."></textarea>
+                                <div
+                                    style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 12px; color: var(--text-muted);">
+                                    <span id="char-count">0 chars</span>
+                                    <button class="btn btn-xs btn-secondary" onclick="rewriteWithAI()"
+                                        style="font-size: 11px; padding: 2px 8px;">
+                                        <i class="fas fa-magic"></i> Rewrite with AI
+                                    </button>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div class="form-group">
+                                    <label class="form-label">Call to Action</label>
+                                    <input type="text" class="form-input" id="pub-cta"
+                                        placeholder="💡 Follow for more AI updates!">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Hashtags</label>
+                                    <input type="text" class="form-input" id="pub-hashtags" placeholder="#AI #ML #Tech">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Source Link (optional)</label>
+                                <input type="text" class="form-input" id="pub-link" placeholder="https://...">
+                            </div>
+
+                            <!-- Image Options -->
+                            <div
+                                style="padding: 16px; background: var(--bg-glass); border-radius: 10px; margin-bottom: 16px; border: 1px solid var(--border);">
+                                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;"><i
+                                        class="fas fa-image" style="color: var(--accent-secondary);"></i> Image
+                                    Generation</h4>
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                        <input type="checkbox" id="pub-gen-image" checked
+                                            style="width: 18px; height: 18px; accent-color: var(--accent-primary);">
+                                        <span>🎨 Generate AI image with post</span>
+                                    </label>
+                                    <select class="form-select" id="image-model-select" style="font-size: 13px;">
+                                        <option value="auto">🤖 Auto (Best Available)</option>
+                                    </select>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        <select class="form-select" id="pub-image-style"
+                                            style="font-size: 13px; flex: 1; min-width: 130px;">
+                                            <option value="auto">🎨 Auto Style</option>
+                                            <option value="digital-art">🖼️ Digital Art</option>
+                                            <option value="realistic">📷 Realistic</option>
+                                            <option value="abstract">🌀 Abstract</option>
+                                            <option value="neon-tech">💡 Neon Tech</option>
+                                            <option value="minimalist">✨ Minimalist</option>
+                                        </select>
+                                        <select class="form-select" id="pub-image-size"
+                                            style="font-size: 13px; flex: 1; min-width: 130px;">
+                                            <option value="auto">📐 Auto Size</option>
+                                            <option value="landscape">🖥️ Landscape</option>
+                                            <option value="square">⬜ Square</option>
+                                            <option value="portrait">📱 Portrait</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="image-preview" style="margin-top: 12px; display: none;"></div>
+                            </div>
+
+                            <!-- Publish Actions -->
+                            <button class="btn btn-primary btn-lg w-full" id="publish-btn" onclick="publishPost()"
+                                style="font-size: 16px; padding: 14px;">
+                                <i class="fas fa-paper-plane"></i> Publish Post
+                            </button>
+                            <div id="publish-result" style="margin-top: 12px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="publish-sidebar">
+                    <!-- Quick Stats -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-chart-bar"></i> Quick Stats</div>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+                                <div style="display: flex; justify-content: space-between;"><span
+                                        style="color: var(--text-secondary);">Published Today</span><span class="tag"
+                                        id="stat-today">0</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span
+                                        style="color: var(--text-secondary);">Total Published</span><span class="tag"
+                                        id="stat-total">0</span></div>
+                                <div style="display: flex; justify-content: space-between;"><span
+                                        style="color: var(--text-secondary);">In Queue</span><span class="tag"
+                                        id="stat-queue">0</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platforms Status -->
+                    <div class="card mb-6">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-plug"></i> Platform Status</div>
+                        </div>
+                        <div class="card-body" id="platform-status">
+                            <div class="loading-overlay">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent History -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-history"></i> Recent Posts</div>
+                        </div>
+                        <div class="card-body" id="history-list" style="max-height: 350px; overflow-y: auto;">
+                            <div class="loading-overlay">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('pub-body')?.addEventListener('input', function () {
+        document.getElementById('char-count').textContent = this.value.length + ' chars';
+    });
+
+    let allTrends = [];
+
+    async function fillFromTrend() {
+        const sel = document.getElementById('trend-selector');
+        const id = sel?.value;
+        if (!id) return App.showToast('Select a trend first', 'warning');
+        const trend = allTrends.find(t => (t.article_id || t.id) === id);
+        if (!trend) return;
+
+        document.getElementById('pub-title').value = trend.article_title || trend.title || '';
+        document.getElementById('pub-body').value = trend.impact_summary || trend.article_summary || trend.summary || '';
+        document.getElementById('pub-link').value = trend.article_link || trend.link || '';
+        document.getElementById('pub-hashtags').value = '#AI #' + (trend.category || 'Tech').replace(/\s+/g, '') + ' #ArtificialIntelligence';
+        document.getElementById('pub-cta').value = '💡 What do you think? Share your thoughts!';
+        document.getElementById('char-count').textContent = (document.getElementById('pub-body').value.length) + ' chars';
+        App.showToast('📝 Filled — edit as needed', 'success');
+    }
+
+    async function fillWithAI() {
+        const sel = document.getElementById('trend-selector');
+        const id = sel?.value;
+        if (!id) return App.showToast('Select a trend first', 'warning');
+        const trend = allTrends.find(t => (t.article_id || t.id) === id);
+        if (!trend) return;
+        App.showToast('🤖 Generating AI content...', 'info', 15000);
+        try {
+            const result = await API.generateContent(id, 'telegram');
+            if (result.content) {
+                document.getElementById('pub-title').value = result.content.title || trend.article_title || '';
+                document.getElementById('pub-body').value = result.content.body || '';
+                document.getElementById('pub-cta').value = result.content.cta || '';
+            }
+            if (result.hashtags) {
+                document.getElementById('pub-hashtags').value = (result.hashtags.universal || []).concat(result.hashtags.niche || []).slice(0, 8).join(' ');
+            }
+            document.getElementById('pub-link').value = trend.article_link || '';
+            document.getElementById('char-count').textContent = (document.getElementById('pub-body').value.length) + ' chars';
+            App.showToast('✅ AI content generated — review and edit!', 'success');
+        } catch (err) {
+            App.showToast(err.message || 'AI generation failed', 'error');
+        }
+    }
+
+    async function rewriteWithAI() {
+        const body = document.getElementById('pub-body')?.value?.trim();
+        if (!body) return App.showToast('Write something first', 'warning');
+        App.showToast('🤖 Rewriting...', 'info', 10000);
+        try {
+            const result = await API.post('/search/ai-search', { query: 'Rewrite for social media, same meaning: ' + body });
+            if (result.answer) {
+                document.getElementById('pub-body').value = result.answer.replace(/\*\*/g, '').replace(/#{1,3}\s/g, '');
+                document.getElementById('char-count').textContent = document.getElementById('pub-body').value.length + ' chars';
+                App.showToast('✅ Rewritten!', 'success');
+            }
+        } catch (err) { App.showToast(err.message || 'Rewrite failed', 'error'); }
+    }
+
+    async function publishPost() {
+        const title = document.getElementById('pub-title')?.value?.trim();
+        const body = document.getElementById('pub-body')?.value?.trim();
+        const cta = document.getElementById('pub-cta')?.value?.trim();
+        const hashtags = document.getElementById('pub-hashtags')?.value?.trim();
+        const link = document.getElementById('pub-link')?.value?.trim();
+        const genImage = document.getElementById('pub-gen-image')?.checked;
+        const imageModel = document.getElementById('image-model-select')?.value || 'auto';
+        const imageStyle = document.getElementById('pub-image-style')?.value || 'auto';
+        const imageSize = document.getElementById('pub-image-size')?.value || 'auto';
+        const language = document.getElementById('pub-language')?.value || 'en';
+        const btn = document.getElementById('publish-btn');
+        const resEl = document.getElementById('publish-result');
+
+        // Collect platforms
+        const platforms = [];
+        if (document.getElementById('plat-telegram')?.checked) platforms.push('telegram');
+        if (document.getElementById('plat-twitter')?.checked) platforms.push('twitter');
+        if (document.getElementById('plat-linkedin')?.checked) platforms.push('linkedin');
+
+        if (!title && !body) return App.showToast('Title or body required', 'warning');
+        if (!platforms.length) return App.showToast('Select at least one platform', 'warning');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing to ' + platforms.join(', ') + '...';
+
+        try {
+            const result = await API.createPost({
+                title, body, cta, hashtags, link,
+                generate_image: genImage,
+                image_model: imageModel,
+                image_style: imageStyle,
+                image_size: imageSize,
+                language: language,
+                platforms: platforms,
+            });
+
+            if (result.success) {
+                App.showToast('🎉 Published successfully!', 'success', 6000);
+                resEl.innerHTML = '<div class="tag success" style="padding: 8px 16px;"><i class="fas fa-check"></i> Published to ' + result.platforms_sent.join(', ') + '!</div>';
+                if (result.image_url) {
+                    document.getElementById('image-preview').style.display = 'block';
+                    document.getElementById('image-preview').innerHTML = `<img src="${result.image_url}" style="max-width: 100%; border-radius: 10px;">`;
+                }
+                loadHistory();
+            } else {
+                let msgs = [];
+                for (const [p, r] of Object.entries(result.results || {})) {
+                    msgs.push(`${p}: ${r.success ? '✅' : r.error || '❌'}`);
+                }
+                resEl.innerHTML = `<div style="padding: 8px; font-size: 13px; color: var(--text-secondary);">${msgs.join('<br>')}</div>`;
+                App.showToast('⚠ Partial publish — check results', 'warning');
+            }
+        } catch (err) {
+            App.showToast(err.message || 'Failed', 'error');
+            resEl.innerHTML = `<div class="tag" style="background: var(--accent-danger); padding: 8px;">Error: ${err.message}</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Post';
+        }
+    }
+
+    async function loadHistory() {
+        const el = document.getElementById('history-list');
+        try {
+            const data = await API.getPublishHistory();
+            const items = data.history || [];
+            if (!items.length) { el.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 20px;">No posts yet</p>'; return; }
+            document.getElementById('stat-total').textContent = items.length;
+            const today = new Date().toISOString().substring(0, 10);
+            document.getElementById('stat-today').textContent = items.filter(i => (i.created_at || '').substring(0, 10) === today).length;
+
+            el.innerHTML = items.slice(0, 15).map(item => {
+                const c = item.content || {};
+                const success = Object.values(item.results || {}).some(r => r.success);
+                const platforms = (item.platforms || []).map(p => `<i class="fab fa-${p}" style="font-size: 11px;"></i>`).join(' ');
+                return `<div style="padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <strong style="color: var(--text-primary); flex: 1;">${App.escapeHtml((c.title || 'Untitled').substring(0, 50))}</strong>
+          <span style="font-size: 11px;">${platforms}</span>
+          <span class="tag ${success ? 'success' : ''}" style="font-size: 11px; margin-left: 6px;">${success ? '✅' : '❌'}</span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 11px;">${App.timeAgo(item.created_at)}</div>
+      </div>`;
+            }).join('');
+        } catch { el.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Failed to load</p>'; }
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!App.requireAuth()) return;
+        App.initSidebar();
+
+        // Load status
+        try {
+            const status = await API.getAIStatus();
+            const setStatus = (id, ok, label) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = ok ? 'tag success' : 'tag warning';
+                el.textContent = ok ? `✅ ${label}` : `⚠ ${label}`;
+            };
+            setStatus('ai-status', status.ai_configured, 'AI');
+            setStatus('tg-status', status.telegram_configured, 'Telegram');
+            setStatus('tw-status', status.twitter_configured, 'Twitter');
+            setStatus('li-status', status.linkedin_configured, 'LinkedIn');
+
+            // Platform status panel
+            const ps = document.getElementById('platform-status');
+            ps.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" width="16" height="16" fill="#0088cc"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg> Telegram</span>
+          <span class="tag ${status.telegram_configured ? 'success' : 'warning'}">${status.telegram_configured ? 'Connected' : 'Not Set'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> 𝕏</span>
+          <span class="tag ${status.twitter_configured ? 'success' : 'warning'}">${status.twitter_configured ? 'Connected' : 'Not Set'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="display: flex; align-items: center; gap: 8px;"><svg viewBox="0 0 24 24" width="15" height="15" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> LinkedIn</span>
+          <span class="tag ${status.linkedin_configured ? 'success' : 'warning'}">${status.linkedin_configured ? 'Connected' : 'Not Set'}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center;"><span style="display: flex; align-items: center; gap: 8px;">🎨 Krea.ai</span><span class="tag ${status.krea_configured ? 'success' : 'warning'}">${status.krea_configured ? 'Connected' : 'Not Set'}</span></div>
+        <a href="/settings" style="color: var(--accent-primary); font-size: 12px; text-align: center; margin-top: 6px;">⚙ Configure in Settings</a>
+      </div>`;
+        } catch { }
+
+        // Load image models
+        try {
+            const data = await API.get('/publish/image-models');
+            const sel = document.getElementById('image-model-select');
+            (data.models || []).forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.key;
+                opt.textContent = `${m.name} (${m.provider})`;
+                sel.appendChild(opt);
+            });
+        } catch { }
+
+        // Load trends for selector
+        try {
+            const data = await API.getTrends();
+            allTrends = data.trends || [];
+            const sel = document.getElementById('trend-selector');
+            allTrends.slice(0, 50).forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.article_id || t.id;
+                const title = t.article_title || t.title || t.impact_summary?.substring(0, 60) || 'Unnamed';
+                opt.textContent = `[${t.trend_score || 0}] ${title.substring(0, 70)}`;
+                sel.appendChild(opt);
+            });
+            if (!allTrends.length) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '— No analyzed trends. Click "Run Analysis" first —';
+                opt.disabled = true;
+                sel.appendChild(opt);
+            }
+        } catch { }
+
+        // Load queue stats
+        try {
+            const q = await API.getQueue();
+            document.getElementById('stat-queue').textContent = (q.stats?.pending || 0);
+        } catch { }
+
+        loadHistory();
+    });
+</script>
+{% endblock %}
